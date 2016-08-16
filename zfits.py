@@ -5,6 +5,7 @@ import numpy as np
 import io
 import bitarray as ba
 import struct
+from math import ceil
 
 
 def create_temporary_copy(path):
@@ -20,24 +21,16 @@ def modify_copy_THEAP(path):
     f.close()
     return temp_path
 
-def read_hufftree(odr):
-    count = unpack(odr, "Q")[0]
-    syms = {}
-    for symbol_id in range(count):
-        sym = unpack(odr, "h")[0]
-        numbits = unpack(odr, "B")[0]
-        numbytes = np.ceil(numbits/8).astype(np.uint8)
-        bits = unpack(odr, "{0:d}B".format(numbytes))
-
-        numbits = numbits%8
-        if numbits == 0:
-            numbits = 8
-
-        syms[sym] = bits, numbits
+def read_hufftree(stream):
+    number_of_symbols = unpack(stream, "Q")[0]
 
     hufftree = {}
-    for sym in syms:
-        code, numbits = syms[sym]
+    for symbol_id in range(number_of_symbols):
+        sym = unpack(stream, "h")[0]
+        numbits = unpack(stream, "B")[0]
+        numbytes = ceil(numbits/8)
+        numbits = numbits % 8 if not numbits % 8 == 0 else 8
+        code = unpack(stream, "{0:d}B".format(numbytes))
 
         sub_tree = hufftree
         for byte in code[:-1]:
