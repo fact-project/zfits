@@ -23,7 +23,7 @@ def modify_copy_THEAP(path):
 def read_hufftree(odr):
     count = unpack(odr, "Q")[0]
     syms = {}
-    for sym_id in range(count):
+    for symbol_id in range(count):
         sym = unpack(odr, "h")[0]
         numbits = unpack(odr, "B")[0]
         numbytes = np.ceil(numbits/8).astype(np.uint8)
@@ -52,37 +52,32 @@ def uncompress_huffman(stream):
     compressedSizes = unpack(stream, "I")[0]
     data_count = unpack(stream, "Q")[0]
     
-    t = read_hufftree(stream)
+    hufftree = read_hufftree(stream)
     
-    a = ba.bitarray()
-    cur_tree = t
-    found_syms = []
-    while len(found_syms) < data_count:
-        if len(a) < 8:
-            for jj in range(4):
-                xr = stream.read(1)
-                aa = ba.bitarray()
-                aa.frombytes(xr)
-                a = aa + a
+    cur_tree = hufftree
+    
+    reservoir = 0
+    fill = 0
+    nbits = 8
+    found_symbols = np.zeros(data_count, dtype=np.int16)
+    symbol_id = 0
+    while symbol_id < data_count:
+        if fill < 8:
+            reservoir |= unpack(stream, "B")[0] << fill
+            fill += 8
 
-        N = (8 - len(a) % 8)
-        aa = ba.bitarray('0'*N)
-        b = (aa +a).tobytes()[-1]
-
-        result = cur_tree[b]
+        result = cur_tree[0xff & reservoir]
         if not isinstance(result, tuple):
             cur_tree = result
-            for i in range(8):
-                a.pop()
-            continue
-
-        sym, nbits = result
-        cur_tree = t
-        found_syms.append(sym)
-
-        for i in range(nbits):
-            a.pop()
-    return found_syms
+            nbits = 8
+        else:
+            sym, nbits = result
+            found_symbols[symbol_id] = sym
+            symbol_id += 1
+            cur_tree = hufftree
+        reservoir >>= nbits
+        fill -= nbits
+    return found_symbols
 
 def unpack(stream, fmt):
     size = struct.calcsize(fmt)
@@ -168,6 +163,6 @@ def main():
 if __name__ == "__main__":
     x = main()
 
-    assert x[:10] == [-72, -10, -70, 37, 68, 9, 1, -3, 2, 3]
-    assert x[295:305] == [0, -5, 3, -2, -2, -79, 5, -38, 40, 53]
-    assert x[-10:] == [-1, -2, 0, 1, 2, 4, 3, 1, -2, -2]
+    assert list(x[:10]) == [-72, -10, -70, 37, 68, 9, 1, -3, 2, 3]
+    assert list(x[295:305]) == [0, -5, 3, -2, -2, -79, 5, -38, 40, 53]
+    assert list(x[-10:]) == [-1, -2, 0, 1, 2, 4, 3, 1, -2, -2]
