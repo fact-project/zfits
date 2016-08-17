@@ -1,11 +1,11 @@
-from fitsio import FITS
-
-import tempfile, shutil, os
-import numpy as np
+import os
 import io
-import bitarray as ba
+import shutil
+import tempfile
 import struct
 from math import ceil
+import numpy as np
+from fitsio import FITS
 
 def unpack(stream, fmt):
     size = struct.calcsize(fmt)
