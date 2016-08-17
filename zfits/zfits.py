@@ -1,10 +1,34 @@
+import io
+from . import tools
+from .tools import unpack
 from fitsio import FITS
+
+process_raw_data = {
+    0: tools.convert,
+    1: tools.revert_preconditioning,
+    2: tools.uncompress_huffman,
+}
+
+fits_to_np_map = {
+    "L": ("Logical", 1),
+    "B": ("Unsigned byte", 1, 'u1'),
+    "I": ("16-bit integer", 2, 'i2'),
+    "J": ("32-bit integer", 4, 'i4'),
+    "K": ("64-bit integer", 8, 'i8'),
+    "A": ("Character", 1, 'c'),
+    "E": ("Single precision floating point", 4, 'f4'),
+    "D": ("Double precision floating point", 8, 'f8'),
+    "C": ("Single precision complex", 8),
+    "M": ("Double precision complex", 16),
+    "P": ("Array Descriptor (32-bit)", 8),
+    "Q": ("Array Descriptor (64-bit)", 16),
+}
 
 class ZFits(FITS):
 
     def __init__(self, filename):
         self.orig_path = filename
-        self.temp_path = modify_copy_THEAP(filename)
+        self.temp_path = tools.modify_copy_THEAP(filename)
         super().__init__(self.temp_path, mode='r')
 
     def __del__(self):

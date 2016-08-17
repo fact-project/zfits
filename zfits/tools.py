@@ -1,3 +1,12 @@
+import os
+import io
+import shutil
+import tempfile
+import struct
+from math import ceil
+import numpy as np
+from fitsio import FITS
+
 def unpack(stream, fmt):
     size = struct.calcsize(fmt)
     buf = stream.read(size)
@@ -79,23 +88,4 @@ def convert(stream, dtype):
     return np.frombuffer(stream.read(), dtype)
 
 
-fits_to_np_map = {
-    "L": ("Logical", 1),
-    "B": ("Unsigned byte", 1, 'u1'),
-    "I": ("16-bit integer", 2, 'i2'),
-    "J": ("32-bit integer", 4, 'i4'),
-    "K": ("64-bit integer", 8, 'i8'),
-    "A": ("Character", 1, 'c'),
-    "E": ("Single precision floating point", 4, 'f4'),
-    "D": ("Double precision floating point", 8, 'f8'),
-    "C": ("Single precision complex", 8),
-    "M": ("Double precision complex", 16),
-    "P": ("Array Descriptor (32-bit)", 8),
-    "Q": ("Array Descriptor (64-bit)", 16),
-}
 
-process_raw_data = {
-    0: convert,
-    1: revert_preconditioning,
-    2: uncompress_huffman,
-}

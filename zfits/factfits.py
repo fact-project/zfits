@@ -1,11 +1,4 @@
-import os
-import io
-import shutil
-import tempfile
-import struct
-from math import ceil
 import numpy as np
-from fitsio import FITS
 from fitsio import FITS
 from .zfits import ZFits
 
