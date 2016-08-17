@@ -77,6 +77,13 @@ def unpack(stream, fmt):
     buf = stream.read(size)
     return struct.unpack(fmt, buf)
 
+def revert_preconditioning(stream):
+    d = stream
+    for i in range(2, len(d)):
+        d[i] += int((d[i-1] + d[i-2])/2)
+
+    return d
+
 fits_to_np_map = {
     "L": ("Logical", 1),
     "B": ("Unsigned byte", 1, 'u1'),
@@ -95,7 +102,7 @@ fits_to_np_map = {
 process_raw_data = {
     0: lambda x : x,
     1: uncompress_huffman,
-    2: lambda x : x,
+    2: revert_preconditioning,
 }
 
 class ZFits(FITS):
@@ -105,7 +112,7 @@ class ZFits(FITS):
         self.temp_path = modify_copy_THEAP(filename)
         super().__init__(self.temp_path, mode='r')
 
-        self.dtypes = self.learn()
+        self.dtypes = self.read_col_dtypes_from_Zforms()
         self.dtypes["BoardTime"] = (self.dtypes["BoardTime"][0], 'u4')
         self.dtypes["Data"] = (self.dtypes["Data"][0], 'B')
 
@@ -113,7 +120,7 @@ class ZFits(FITS):
         import os
         os.unlink(self.temp_path)
 
-    def learn(self):
+    def read_col_dtypes_from_Zforms(self):
         colnames = self[2].get_colnames()
         h = self[2].read_header()
         uncompressed_coltypes = {}
@@ -127,7 +134,6 @@ class ZFits(FITS):
     def get(self, colname, arg):
         x = self[2][colname][arg]
         return self.compression_block(x, colname)
-
 
     def compression_block(self, x, colname):
         stream = io.BytesIO(x.tobytes())
@@ -147,15 +153,12 @@ class ZFits(FITS):
             return stream
 
 
-
 def main():
     z = ZFits("20160809_121.fits.fz")
-    x = z.get("Data", 0)
+    from tqdm import tqdm
+    for i in tqdm(range(10)):
+        x = z.get("Data", i)
     return x
     
 if __name__ == "__main__":
     x = main()
-
-    assert list(x[:10]) == [-72, -10, -70, 37, 68, 9, 1, -3, 2, 3]
-    assert list(x[295:305]) == [0, -5, 3, -2, -2, -79, 5, -38, 40, 53]
-    assert list(x[-10:]) == [-1, -2, 0, 1, 2, 4, 3, 1, -2, -2]
