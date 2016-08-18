@@ -1,4 +1,5 @@
 from setuptools import setup
+from Cython.Build import cythonize
 
 setup(
     name='zfits',
@@ -13,6 +14,8 @@ setup(
         'fitsio',
         'numpy',
     ],
+    ext_modules=cythonize("zfits/cython_tools.pyx"),
     entry_points={},
+    package_data={'zfits': ['test_data/*']},
     zip_safe=False,
 )

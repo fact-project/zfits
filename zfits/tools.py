@@ -6,6 +6,7 @@ import struct
 from math import ceil
 import numpy as np
 from fitsio import FITS
+from .cython_tools import revert_preconditioning_inner
 
 def unpack(stream, fmt):
     size = struct.calcsize(fmt)
@@ -78,11 +79,7 @@ def uncompress_huffman(stream, *args):
     return found_symbols
 
 def revert_preconditioning(stream, *args):
-    d = stream
-    for i in range(2, len(d)):
-        d[i] += int((d[i-1] + d[i-2])/2)
-
-    return d
+    return revert_preconditioning_inner(stream) 
 
 def convert(stream, dtype):
     return np.frombuffer(stream.read(), dtype)
