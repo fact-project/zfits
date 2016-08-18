@@ -27,13 +27,12 @@ fits_to_np_map = {
 class ZFits(FITS):
 
     def __init__(self, filename):
-        self.orig_path = filename
-        self.temp_path = tools.modify_copy_THEAP(filename)
-        super().__init__(self.temp_path, mode='r')
+        self.file_path = filename
+        super().__init__(self.file_path, mode='r')
 
     def __del__(self):
         import os
-        os.unlink(self.temp_path)
+        os.unlink(self.file_path)
 
     def _read_dtype(self, extension, colname):
         colnum = self[extension].get_colnames().index(colname)
@@ -56,5 +55,5 @@ class ZFits(FITS):
 
     def get(self, extension, colname, rownum):
         dtype = self._read_dtype(extension, colname)
-        array = self[extension][colname][rownum]
+        array = self[extension][colname][rownum][0]
         return self._uncompress_block(array, colname, dtype)

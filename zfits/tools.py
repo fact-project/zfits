@@ -13,20 +13,6 @@ def unpack(stream, fmt):
     buf = stream.read(size)
     return struct.unpack(fmt, buf)
 
-def create_temporary_copy(path):
-    temp_dir = tempfile.gettempdir()
-    temp_path = os.path.join(temp_dir, os.path.basename(path))
-    shutil.copy2(path, temp_path)
-    return temp_path
-
-def modify_copy_THEAP(path):
-    temp_path = create_temporary_copy(path)
-    f = FITS(temp_path, "rw")
-    f[2].write_key("THEAP", f[2].read_header()["ZHEAPPTR"])
-    f[1].write_key("THEAP", f[1].read_header()["ZHEAPPTR"])
-    f.close()
-    return temp_path
-
 def read_hufftree(stream):
     number_of_symbols = unpack(stream, "Q")[0]
 
