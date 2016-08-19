@@ -1,9 +1,11 @@
 # zfits
 a pure python zfits/factfits reader
 
-# Beware .. this has no setup.py yet 
+# Beware !
 
-you need to `pip install fitsio` (currently version 0.9.10) before using it.
+In order to use this, you'll need to use a fork of the original fitsio:
+
+    pip install git+https://github.com/dneise/fistio
 
 # Example? 
 
