@@ -30,10 +30,6 @@ class ZFits(FITS):
         self.file_path = filename
         super().__init__(self.file_path, mode='r')
 
-    def __del__(self):
-        import os
-        os.unlink(self.file_path)
-
     def _read_dtype(self, extension, colname):
         colnum = self[extension].get_colnames().index(colname)
         h = self[extension].read_header()
