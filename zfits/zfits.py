@@ -64,13 +64,26 @@ class ZFits(FITS):
         z_drs_offset = np.concatenate((z_drs_offset, z_drs_offset), axis=1)
         return z_drs_offset
 
-    def get_raw_data(self, row):
+    def get_raw_data(self, row, rolled=False):
 
         data = self.get("Events", "Data", row)
         data = data.reshape(1440, -1)
-        if (self.z_drs_offset == 0).all():
-            return data
-        sc = self.get("Events", "StartCellData", row)
-        for i in range(1440):
-            data[i] += self.z_drs_offset[i, sc[i]:sc[i]+len(data[i])]
+        if not (self.z_drs_offset == 0).all():
+            for i in range(1440):
+                data[i] += self.z_drs_offset[i, sc[i]:sc[i]+len(data[i])]
+
+        if rolled:
+            sc = self.get("Events", "StartCellData", row)
+            for i, s in enumerate(sc):
+                data[i] = np.roll(data[i], s)
+            """
+            assert data.shape[1] == 1024
+
+            sc_per_chip = sc[::9]
+
+            x = np.copy(data)
+            for cid, scpc in enumerate(sc_per_chip):
+                data[cid*9:(cid+1)*9, scpc:] = x[cid*9:(cid+1)*9, :1024 - scpc]
+                data[cid*9:(cid+1)*9, :scpc] = x[cid*9:(cid+1)*9, 1024 - scpc:]
+            """
         return data
