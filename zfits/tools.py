@@ -48,7 +48,12 @@ def uncompress_huffman(stream, *args):
     symbol_id = 0
     while symbol_id < data_count:
         if fill < 8:
-            reservoir |= unpack(stream, "B")[0] << fill
+            try:
+                reservoir |= unpack(stream, "B")[0] << fill
+            except struct.error:
+                # when stream is over, we might need to "fill"
+                # with a few zeros.
+                pass
             fill += 8
 
         result = cur_tree[0xff & reservoir]
