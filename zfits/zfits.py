@@ -2,12 +2,9 @@ import io
 from . import tools
 from .tools import unpack
 from fitsio import FITS
-
-process_raw_data = {
-    0: tools.convert,
-    1: tools.revert_preconditioning,
-    2: tools.uncompress_huffman,
-}
+import functools
+import numpy as np
+import time
 
 fits_to_np_map = {
     "L": ("Logical", 1),
@@ -46,10 +43,34 @@ class ZFits(FITS):
         num_proc = unpack(stream, 'B')[0]
         proc = unpack(stream, "%dH"%num_proc)
         for proc_key in proc[::-1]:
-            stream = process_raw_data[proc_key](stream, dtype)
+            if proc_key == 0:
+                stream = tools.convert(stream, dtype)
+            elif proc_key == 1:
+                stream = tools.revert_preconditioning(stream)
+            elif proc_key == 2:
+                stream = tools.uncompress_huffman(stream, array)
         return stream
 
     def get(self, extension, colname, rownum):
         dtype = self._read_dtype(extension, colname)
         array = self[extension][colname][rownum][0]
         return self._uncompress_block(array, colname, dtype)
+
+    @property
+    @functools.lru_cache()
+    def z_drs_offset(self):
+        z_drs_offset = self.get("ZDrsCellOffsets","OffsetCalibration",0)
+        z_drs_offset = z_drs_offset.reshape(1440, -1)
+        z_drs_offset = np.concatenate((z_drs_offset, z_drs_offset), axis=1)
+        return z_drs_offset
+
+    def get_raw_data(self, row):
+
+        data = self.get("Events", "Data", row)
+        data = data.reshape(1440, -1)
+        if (self.z_drs_offset == 0).all():
+            return data
+        sc = self.get("Events", "StartCellData", row)
+        for i in range(1440):
+            data[i] += self.z_drs_offset[i, sc[i]:sc[i]+len(data[i])]
+        return data

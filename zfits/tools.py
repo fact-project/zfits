@@ -7,6 +7,7 @@ from math import ceil
 import numpy as np
 from fitsio import FITS
 from .cython_tools import revert_preconditioning_inner
+from .cython_tools import huff_decode
 
 def unpack(stream, fmt):
     size = struct.calcsize(fmt)
@@ -15,6 +16,11 @@ def unpack(stream, fmt):
 
 def read_hufftree(stream):
     number_of_symbols = unpack(stream, "Q")[0]
+
+    if number_of_symbols == 1:
+        sym = unpack(stream, "h")[0]
+        hufftree = {0 : (sym, 8)}
+        return hufftree
 
     hufftree = {}
     for symbol_id in range(number_of_symbols):
@@ -33,7 +39,8 @@ def read_hufftree(stream):
 
     return hufftree
 
-def uncompress_huffman(stream, *args):
+def uncompress_huffman(stream, array):
+    """
     compressedSizes = unpack(stream, "I")[0]
     data_count = unpack(stream, "Q")[0]
     
@@ -68,8 +75,17 @@ def uncompress_huffman(stream, *args):
         reservoir >>= nbits
         fill -= nbits
     return found_symbols
+    """
+    compressedSizes = unpack(stream, "I")[0]
+    data_count = unpack(stream, "Q")[0]
+    
+    w = stream.tell()
+    out = np.empty(data_count, dtype=np.int16)
+    huff_decode(array[w:], out)
+    return out
 
-def revert_preconditioning(stream, *args):
+
+def revert_preconditioning(stream):
     return revert_preconditioning_inner(stream) 
 
 def convert(stream, dtype):
