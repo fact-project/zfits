@@ -67,13 +67,13 @@ class ZFits(FITS):
     def get_raw_data(self, row, rolled=False):
 
         data = self.get("Events", "Data", row)
+        sc = self.get("Events", "StartCellData", row)
         data = data.reshape(1440, -1)
         if not (self.z_drs_offset == 0).all():
             for i in range(1440):
                 data[i] += self.z_drs_offset[i, sc[i]:sc[i]+len(data[i])]
 
         if rolled:
-            sc = self.get("Events", "StartCellData", row)
             for i, s in enumerate(sc):
                 data[i] = np.roll(data[i], s)
             """
