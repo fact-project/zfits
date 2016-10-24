@@ -5,7 +5,7 @@ a pure python zfits/factfits reader
 
 In order to use this, you'll need to use a fork of the original fitsio:
 
-    pip install git+https://github.com/dneise/fistio
+    pip install git+https://github.com/dneise/fitsio
 
 # Example? 
 
