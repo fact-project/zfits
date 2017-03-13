@@ -2,6 +2,8 @@ import numpy as np
 from fitsio import FITS
 from .zfits import ZFits
 
+from .cython_tools import remove_spikes_4
+
 class FactFits:
 
     def __init__(self, data_path, calib_path):
@@ -34,7 +36,7 @@ class FactFits:
         self.trg = trg
 
         self.previous_start_cells = []
-        self.fMaxNumPrevEvents = 10
+        self.fMaxNumPrevEvents = 5
 
     def get(self, colname, row):
         data = self.data_file.get("Events", colname, row)
@@ -53,6 +55,11 @@ class FactFits:
             calib_data[i] = data[i] + self.off[i, sc[i]:sc[i]+len(calib_data[i])] - self.trg[i]
             calib_data *= self.gain[i, sc[i]:sc[i]+len(calib_data[i])]
 
+        calib_data = self._remove_jumps(calib_data)
+        self._remove_spikes_in_place(calib_data)
+        return calib_data
+
+    def _remove_jumps(self, calib_data):
         for old_sc in self.previous_start_cells:
             self._correct_step(
                 calib_data,
@@ -66,6 +73,9 @@ class FactFits:
         self.previous_start_cells.append(np.copy(sc))
         self.previous_start_cells = self.previous_start_cells[-self.fMaxNumPrevEvents:]
         return calib_data
+
+    def _remove_spikes_in_place(self, calib_data):
+        remove_spikes_4(calib_data)
 
     def __repr__(self):
         return repr(self.data_file[2]) + repr(self.drs_file[1])

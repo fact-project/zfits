@@ -48,3 +48,22 @@ def huff_decode(np.ndarray[np.uint8_t, ndim=1] bufin not None, np.ndarray[np.int
     cdef int bufoutlen = bufout.shape[0]
     Decode_dom(&bufin[0], bufinlen, &bufout[0], bufoutlen)
     return None
+
+
+cdef extern void remove_spikes_4_dom (
+        np.float32_t *calib_data,
+        size_t number_of_pixel,
+        np.uint32_t roi
+    )
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def remove_spikes_4(
+        np.ndarray[np.float32_t, ndim=2] calib_data not None,
+        ):
+
+    cdef int number_of_pixel = calib_data.shape[0]
+    cdef unsigned int roi = calib_data.shape[1]
+
+    remove_spikes_4_dom(&calib_data[0,0], number_of_pixel, roi)
+    return None
