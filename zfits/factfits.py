@@ -4,6 +4,7 @@ from .zfits import ZFits
 
 from .cython_tools import remove_spikes_4
 
+
 class FactFits:
 
     def __init__(self, data_path, calib_path):
@@ -33,7 +34,6 @@ class FactFits:
         gain /= 1907.35
         self.gain = gain
 
-
         trg = self.drs_file[1]["TriggerOffsetMean"][0]
         trg = trg.reshape(1440, -1)
         trg *= 4096 / 2000
@@ -43,6 +43,7 @@ class FactFits:
         self.fMaxNumPrevEvents = 5
 
         self.current_row = None
+
     def get(self, colname, row):
         data = self.data_file.get("Events", colname, row)
 
@@ -59,7 +60,9 @@ class FactFits:
         calib_data = np.zeros_like(data, np.float32)
 
         for i in range(1440):
-            calib_data[i] = data[i] + self.off[i, sc[i]:sc[i]+len(calib_data[i])] - self.trg[i]
+            calib_data[i] = data[i] - self.trg[i] + self.off[
+                i, sc[i]:sc[i]+len(calib_data[i])
+                ]
             calib_data[i] *= self.gain[i, sc[i]:sc[i]+len(calib_data[i])]
 
         calib_data = self._remove_jumps(calib_data, sc)
@@ -75,15 +78,17 @@ class FactFits:
         for old_sc in self.previous_start_cells:
             correct_step(
                 calib_data,
-                dists=(old_sc - sc + roi+10 + 1024)%1024
+                dists=(old_sc - sc + roi+10 + 1024) % 1024
             )
             correct_step(
                 calib_data,
-                dists=(old_sc - sc + 3 + 1024)%1024
+                dists=(old_sc - sc + 3 + 1024) % 1024
             )
 
         self.previous_start_cells.append(np.copy(sc))
-        self.previous_start_cells = self.previous_start_cells[-self.fMaxNumPrevEvents:]
+        self.previous_start_cells = self.previous_start_cells[
+            -self.fMaxNumPrevEvents:
+        ]
         return calib_data
 
     def _remove_spikes_in_place(self, calib_data):
@@ -97,7 +102,7 @@ def correct_step(calib_data, dists):
     roi = calib_data.shape[1]
     dists[dists >= roi] = 0
     steps = find_steps(calib_data, dists)
-    patch_steps = steps.reshape(-1 , 9)[:, :8].mean(axis=1)
+    patch_steps = steps.reshape(-1, 9)[:, :8].mean(axis=1)
 
     if np.isnan(patch_steps).all():
         return
@@ -113,9 +118,9 @@ def correct_step(calib_data, dists):
         average_step = np.nanmean(patch_steps)
 
     if average_step > 0:
-        mask = dists[:,None] <= np.arange(calib_data.shape[1])
+        mask = dists[:, None] <= np.arange(calib_data.shape[1])
     else:
-        mask = dists[:,None] > np.arange(calib_data.shape[1])
+        mask = dists[:, None] > np.arange(calib_data.shape[1])
     calib_data[mask] -= np.abs(average_step)
     return average_step
 
@@ -128,7 +133,7 @@ def find_steps(data, dists):
         ],
         axis=1
     )
-    #treat special cases
+    # treat special cases
     diff[dists == 0] = np.nan
     diff[dists == data.shape[1]] = np.nan
     return diff
