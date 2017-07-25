@@ -60,10 +60,11 @@ class FactFits:
         calib_data = np.zeros_like(data, np.float32)
 
         for i in range(1440):
-            calib_data[i] = data[i] - self.trg[i] + self.off[
+            calib_data[i] = data[i] + self.off[
                 i, sc[i]:sc[i]+len(calib_data[i])
                 ]
             calib_data[i] *= self.gain[i, sc[i]:sc[i]+len(calib_data[i])]
+            calib_data[i] -= self.trg[i]
 
         calib_data = self._remove_jumps(calib_data, sc)
         self._remove_spikes_in_place(calib_data)
