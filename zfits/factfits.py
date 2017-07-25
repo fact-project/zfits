@@ -23,20 +23,15 @@ class FactFits:
         bsl = self.drs_file[1]["BaselineMean"][0]
         bsl = bsl.reshape(1440, -1)
         bsl = np.concatenate((bsl, bsl), axis=1)
-        bsl *= 4096 / 2000
         self.bsl = bsl
-
-        self.off = self.z_drs_offset - self.bsl
 
         gain = self.drs_file[1]["GainMean"][0]
         gain = gain.reshape(1440, -1)
         gain = np.concatenate((gain, gain), axis=1)
-        gain /= 1907.35
         self.gain = gain
 
         trg = self.drs_file[1]["TriggerOffsetMean"][0]
         trg = trg.reshape(1440, -1)
-        trg *= 4096 / 2000
         self.trg = trg
 
         self.previous_start_cells = []
@@ -57,14 +52,17 @@ class FactFits:
         sc = self.data_file.get("Events", "StartCellData", row)
         data = data.reshape(1440, -1)
 
-        calib_data = np.zeros_like(data, np.float32)
+        calib_data = np.empty_like(data, np.float32)
+        roi = calib_data.shape[1]
 
-        for i in range(1440):
-            calib_data[i] = data[i] + self.off[
-                i, sc[i]:sc[i]+len(calib_data[i])
-                ]
-            calib_data[i] *= self.gain[i, sc[i]:sc[i]+len(calib_data[i])]
-            calib_data[i] -= self.trg[i]
+        for pix in range(1440):
+            sl = slice(sc[pix], sc[pix] + roi)
+            calib_data[pix] = data[pix] + self.z_drs_offset[pix, sl]
+            calib_data[pix] *= 2000.0 / 4096.0
+            calib_data[pix] -= self.bsl[pix, sl]
+            calib_data[pix] -= self.trg[pix]
+            calib_data[pix] /= self.gain[pix, sl]
+            calib_data[pix] *= 1907.35
 
         calib_data = self._remove_jumps(calib_data, sc)
         self._remove_spikes_in_place(calib_data)
