@@ -1,5 +1,4 @@
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup, Extension
 from Cython.Distutils import build_ext
 
 import numpy
@@ -30,4 +29,6 @@ setup(
             extra_compile_args=['-std=c++0x']
         )
     ],
+    tests_require=['pytest>=3.0.0'],
+    setup_requires=['pytest-runner'],
 )
