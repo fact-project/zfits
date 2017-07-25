@@ -6,7 +6,7 @@ import numpy
 
 setup(
     name='zfits',
-    version='0.0.2',
+    version='0.0.3',
     description='a pure python zfits/factfits reader',
     url='https://github.com/fact-project/zfits',
     author='Dominik Neise',
@@ -20,10 +20,14 @@ setup(
     entry_points={},
     package_data={'zfits': ['test_data/*']},
     zip_safe=False,
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("zfits.cython_tools",
-                             sources=["zfits/cython_tools.pyx", "zfits/example.cpp"],
-                             include_dirs=[numpy.get_include(), "zfits"],
-                             language="c++",
-                             extra_compile_args=['-std=c++0x'])],
+    cmdclass={'build_ext': build_ext},
+    ext_modules=[
+        Extension(
+            'zfits.cython_tools',
+            sources=['zfits/cython_tools.pyx', 'zfits/fact++wrapper.cpp'],
+            include_dirs=[numpy.get_include(), 'zfits'],
+            language="c++",
+            extra_compile_args=['-std=c++0x']
+        )
+    ],
 )
