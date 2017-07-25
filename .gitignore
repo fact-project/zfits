@@ -1,3 +1,4 @@
+cython_tools.cpp
 github_deploy_key*
 *.swp
 

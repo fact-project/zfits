@@ -11,15 +11,6 @@ class FactFits:
         self.data_file = ZFits(data_path)
         self.drs_file = FITS(calib_path)
 
-        z_drs_offset = self.data_file.get(
-            "ZDrsCellOffsets",
-            "OffsetCalibration",
-            0
-        )
-        z_drs_offset = z_drs_offset.reshape(1440, -1)
-        z_drs_offset = np.concatenate((z_drs_offset, z_drs_offset), axis=1)
-        self.z_drs_offset = z_drs_offset
-
         bsl = self.drs_file[1]["BaselineMean"][0]
         bsl = bsl.reshape(1440, -1)
         bsl = np.concatenate((bsl, bsl), axis=1)
@@ -48,17 +39,15 @@ class FactFits:
         if self.current_row == row:
             return self.calib_data
 
-        data = self.data_file.get("Events", "Data", row)
+        data = self.data_file.get_raw_data(row)
         sc = self.data_file.get("Events", "StartCellData", row)
-        data = data.reshape(1440, -1)
 
         calib_data = np.empty_like(data, np.float32)
         roi = calib_data.shape[1]
 
         for pix in range(1440):
             sl = slice(sc[pix], sc[pix] + roi)
-            calib_data[pix] = data[pix] + self.z_drs_offset[pix, sl]
-            calib_data[pix] *= 2000.0 / 4096.0
+            calib_data[pix] = data[pix] * 2000.0 / 4096.0
             calib_data[pix] -= self.bsl[pix, sl]
             calib_data[pix] -= self.trg[pix]
             calib_data[pix] /= self.gain[pix, sl]
