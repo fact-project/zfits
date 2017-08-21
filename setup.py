@@ -13,8 +13,11 @@ setup(
     license='MIT',
     packages=['zfits'],
     install_requires=[
-        'fitsio',
+        'fitsio>=23',
         'numpy',
+    ],
+    dependency_links=[
+        'https://github.com/dneise/fitsio/master#egg=fitsio-23.0.1'
     ],
     entry_points={},
     package_data={'zfits': ['test_data/*']},
