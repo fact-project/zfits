@@ -17,7 +17,7 @@ setup(
         'numpy',
     ],
     dependency_links=[
-        'https://github.com/dneise/fitsio/master#egg=fitsio-23.0.1'
+        'https://github.com/dneise/fitsio#egg=fitsio-23.0.1'
     ],
     entry_points={},
     package_data={'zfits': ['test_data/*']},
