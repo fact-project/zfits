@@ -1,11 +1,10 @@
 # zfits
 a pure python zfits/factfits reader
 
-# Beware !
+# Install
 
-In order to use this, you'll need to use a fork of the original fitsio:
+    pip install git+https://github.com/fact-project/zfits --process-dependency-links
 
-    pip install https://github.com/dneise/fitsio/archive/master.tar.gz
 
 # Example? 
 
