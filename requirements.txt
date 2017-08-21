@@ -1,2 +1,2 @@
--e git+git@github.com:dneise/fitsio.git
+-e git+git@github.com:dneise/fitsio.git@26b52c7c003f69f400a97ed93455c9a86925fab8#egg=fitsio-23.0.1
 numpy
