@@ -1,2 +1,2 @@
-fitsio
+-e git+git@github.com:dneise/fitsio.git
 numpy
