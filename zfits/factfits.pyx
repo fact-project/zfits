@@ -40,8 +40,6 @@ cdef extern from "factfits.h":
         ) except +
 
         size_t GetNumRows() except +
-        bool_t HasKey(const string key)
-        bool_t HasColumn(const string col)
 
         bool_t SetPtrAddress[T](
             const string name,
@@ -67,12 +65,6 @@ cdef class Pyfactfits:
 
     def GetNumRows(self):
         return self.c_factfits.GetNumRows()
-
-    def HasKey(self, key):
-        return self.c_factfits.HasKey(bytes(key, 'ascii'))
-
-    def HasColumn(self, col):
-        return self.c_factfits.HasColumn(bytes(col, 'ascii'))
 
     def SetPtrAddress(self, name, array):
         print(array, array, array.dtype, array.data, array.shape)
