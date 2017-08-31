@@ -24,16 +24,9 @@ fits_to_np_map = {
 }
 
 
-
 cdef extern from "factfits.h":
     cdef cppclass factfits:
         cppclass Table:
-            cppclass Column:
-                size_t offset, num, size, bytes
-                char type
-                string unit
-                int comp
-
             vector[string] GetColumnNames()
             vector[char] GetColumnTypes()
             vector[size_t] GetColumnWidth()
