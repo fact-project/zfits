@@ -1,4 +1,5 @@
 # distutils: language = c++
+from fitsio import FITS
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -6,6 +7,23 @@ from libcpp.string cimport string
 from libcpp cimport bool as bool_t
 from libcpp.vector cimport vector
 from libcpp.map cimport map as _map
+
+# maybe nice to know ... not needed at the moment.
+fits_to_np_map = {
+    "L": ("Logical", 1),
+    "B": ("Unsigned byte", 1, 'u1'),
+    "I": ("16-bit integer", 2, 'i2'),
+    "J": ("32-bit integer", 4, 'i4'),
+    "K": ("64-bit integer", 8, 'i8'),
+    "A": ("Character", 1, 'c'),
+    "E": ("Single precision floating point", 4, 'f4'),
+    "D": ("Double precision floating point", 8, 'f8'),
+    "C": ("Single precision complex", 8),
+    "M": ("Double precision complex", 16),
+    "P": ("Array Descriptor (32-bit)", 8),
+    "Q": ("Array Descriptor (64-bit)", 16),
+}
+
 
 
 cdef extern from "factfits.h":
@@ -51,12 +69,11 @@ cdef class Pyfactfits:
             bytes(tablename, 'ascii'),
             force)
 
+    def __dealloc__(self):
+        del self.c_factfits
 
     def GetRow(self, row, check=True):
         return self.c_factfits.GetRow(row, check)
-
-    def __dealloc__(self):
-        del self.c_factfits
 
     def GetNumRows(self):
         return self.c_factfits.GetNumRows()
@@ -126,10 +143,11 @@ cdef class Pyfactfits:
         return _array
 
 
-class AnotherFoo:
+class FactFits:
 
-    def __init__(self, fname, columns):
+    def __init__(self, fname):
         self.f = Pyfactfits(fname)
+        self.fitsio = FITS(fname)
         self.row = 0
         self.rows = self.f.GetNumRows()
 
@@ -139,9 +157,10 @@ class AnotherFoo:
             np.int32: self.f.SetPtrAddress_int32,
         }
         for name, (dtype, width) in self.f.cols_dtypes.items():
-            if name not in columns:
-                continue
             self.data[name] = set_ptr_address[dtype](name)
+
+    def header(self):
+        return self.fitsio[2].read_header()
 
     def __next__(self):
         if self.row < self.rows:
