@@ -66,18 +66,6 @@ cdef class Pyfactfits:
     def GetNumRows(self):
         return self.c_factfits.GetNumRows()
 
-    def SetPtrAddress(self, name, array):
-        print(array, array, array.dtype, array.data, array.shape)
-
-    def ColumnNames(self):
-        return self.c_factfits.fTable.GetColumnNames()
-
-    def ColumnTypes(self):
-        return list(map(chr, self.c_factfits.fTable.GetColumnTypes()))
-
-    def ColumnWidth(self):
-        return self.c_factfits.fTable.GetColumnWidth()
-
     @property
     def cols_dtypes(self):
 
@@ -88,9 +76,9 @@ cdef class Pyfactfits:
 
         dtypes = {}
         for name, type_code, width in zip(
-            self.ColumnNames(),
-            self.ColumnTypes(),
-            self.ColumnWidth()
+            self.c_factfits.fTable.GetColumnNames(),
+            list(map(chr, self.c_factfits.fTable.GetColumnTypes())),
+            self.c_factfits.fTable.GetColumnWidth()
         ):
             dtypes[name] = numpy_type_map[type_code], width
 
