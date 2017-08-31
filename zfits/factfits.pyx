@@ -1,7 +1,7 @@
 # distutils: language = c++
 import numpy as np
 cimport numpy as np
-
+cimport cython
 from libcpp.string cimport string
 from libcpp cimport bool as bool_t
 from libcpp.vector cimport vector
@@ -153,36 +153,6 @@ class AnotherFoo:
 
     def __iter__(self):
         return self
-
-DTYPE = np.int16
-ctypedef np.int16_t DTYPE_t
-cimport cython
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.cdivision(True)
-def revert_preconditioning_inner(np.ndarray[DTYPE_t, ndim=1] d):
-    cdef int N = d.shape[0]
-    cdef int i
-    for i in range(2, N):
-        d[i] += (d[i-1] + d[i-2]) / 2
-    return d
-
-cdef extern void Decode_dom (const np.uint8_t *bufin, size_t bufinlen, np.int16_t *bufout, size_t bufoutlen)
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def huff_decode(np.ndarray[np.uint8_t, ndim=1] bufin not None, np.ndarray[np.int16_t, ndim=1] bufout not None):
-    cdef int bufinlen = bufin.shape[0]
-    cdef int bufoutlen = bufout.shape[0]
-    Decode_dom(&bufin[0], bufinlen, &bufout[0], bufoutlen)
-    return None
-
-
-cdef extern void remove_spikes_4_dom (
-        np.float32_t *calib_data,
-        size_t number_of_pixel,
-        np.uint32_t roi
-    )
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
