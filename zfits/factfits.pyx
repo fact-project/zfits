@@ -6,7 +6,6 @@ cimport cython
 from libcpp.string cimport string
 from libcpp cimport bool as bool_t
 from libcpp.vector cimport vector
-from libcpp.map cimport map as _map
 
 # maybe nice to know ... not needed at the moment.
 fits_to_np_map = {
@@ -38,8 +37,6 @@ cdef extern from "factfits.h":
             vector[string] GetColumnNames()
             vector[char] GetColumnTypes()
             vector[size_t] GetColumnWidth()
-
-            ctypedef _map[string, Column] Columns
 
         Table fTable
 
