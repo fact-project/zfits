@@ -55,19 +55,6 @@ private:
         int16_t *startCell = reinterpret_cast<int16_t*>(fBufferRow.data() + offset + fOffsetStartCellData);
         int16_t *data      = reinterpret_cast<int16_t*>(fBufferRow.data() + offset + fOffsetData);
 
-         /*
-         for (uint32_t i=0; i<1440*1024; i+=1024, startCell++)
-         {
-             if (*startCell < 0)
-             {
-                 data += fNumRoi;
-                 continue;
-             }
-             for (uint32_t j=0; j<fNumRoi; j++, data++)
-                 *data += fOffsetCalibration[i + (*startCell+j)%1024];
-         }
-         */
-
         // This version is faster because the compilers optimization
         // is not biased by the evaluation of %1024
         for (int ch=0; ch<1440; ch++)
