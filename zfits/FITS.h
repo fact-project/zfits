@@ -17,15 +17,12 @@
 #include <vector>
 #include <string>
 
-#ifndef __CINT__
 #include <unordered_set>
-#endif
 
 namespace FITS
 {
     static inline bool IsReservedKeyWord(const std::string &key)
     {
-#ifndef __CINT__
         static const std::unordered_set<std::string> keys =
         {
             "DATASUM",  "END",      "EXTNAME",  "PCOUNT",   "NAXIS",
@@ -44,7 +41,6 @@ namespace FITS
 
         const std::string five = key.substr(0, 5);
         return short_keys.find(five)!=short_keys.end();
-#endif
     }
 
     static inline std::string CommentFromType(char type)
@@ -73,13 +69,13 @@ namespace FITS
 
         switch (type)
         {
-        case 'L': 
-        case 'A': 
+        case 'L':
+        case 'A':
         case 'B': size =  1; break;
         case 'I': size =  2; break;
-        case 'J': 
+        case 'J':
         case 'E': size =  4; break;
-        case 'K': 
+        case 'K':
         case 'D': size =  8; break;
         case 'Q': size = 16; break;
         }
@@ -102,12 +98,6 @@ namespace FITS
         kOrderByRow = 'R'
     };
 
-#ifdef __CINT__
-    // CINT doesn't like the packed attribute...
-    // Therefore we give another hint of the size of the structure
-    struct TileHeader  { char dummy[16]; };
-    struct BlockHeader { char dummy[10]; };
-#else
     //Structure helper for tiles headers
     struct TileHeader
     {
@@ -140,7 +130,6 @@ namespace FITS
         {
         }
     } __attribute__((__packed__));
-#endif
 
     //Helper structure to simplify the initialization and handling of compressed blocks headers
     struct Compression
@@ -158,14 +147,6 @@ namespace FITS
         {
             sequence[0] = compression;
         }
-
-#ifdef __MARS__ // needed for CINT
-        Compression(const int &compression)
-            : sequence(1), header(0, kOrderByCol, 1)
-        {
-            sequence[0] = compression;
-        }
-#endif
 
         RowOrdering_t getOrdering() const { return RowOrdering_t(header.ordering); }
         uint32_t getSizeOnDisk() const { return sizeof(BlockHeader) + sizeof(uint16_t)*header.numProcs; }
