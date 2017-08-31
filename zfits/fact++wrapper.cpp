@@ -3,13 +3,24 @@
 #include "factfits.h"
 
 extern "C"{
-    void Decode_dom(const uint8_t *bufin, size_t bufinlen, int16_t *bufout, size_t bufoutlen) {
+    void Decode_dom(
+            const uint8_t *bufin,
+            size_t bufinlen,
+            int16_t *bufout,
+            size_t bufoutlen
+        )
+    {
         int64_t i = 0;
         const Huffman::Decoder decoder(bufin, i);
         uint16_t * mybuf = (uint16_t *)bufout;
         uint16_t * mybuf_end = (uint16_t *)(bufout+bufoutlen);
-        decoder.Decode(bufin+i, bufin+bufinlen, mybuf, mybuf_end);
-        return ;
+        decoder.Decode(
+            bufin + i,
+            bufin + bufinlen,
+            mybuf,
+            mybuf_end
+        );
+        return;
     }
 
     void remove_spikes_4_dom(
