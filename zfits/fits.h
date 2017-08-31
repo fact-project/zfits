@@ -12,46 +12,17 @@
 
 #define GCC_VERSION (__GNUC__ * 10000  + __GNUC_MINOR__ * 100  + __GNUC_PATCHLEVEL__)
 
-#ifndef __CINT__
 #include <unordered_map>
-#else
-#define off_t size_t
-namespace std
-{
-    template<class T, class S> class unordered_map<T, S>;
-}
-#endif
 
-#if defined(__MARS__) || defined(__CINT__)
-#include "MLog.h"
-#include "MLogManip.h"
-#define ___err___   err
-#define ___warn___  warn
-#define ___all___   all
-#else
 #include <vector>
 #include <iomanip>
 #include <iostream>
-#ifndef gLog
-#define gLog std::cerr
-#define ___err___   ""
-#define ___warn___  ""
-#define ___all___   ""
-#endif
-#endif
-
-#if defined(HAVE_ZLIB) || defined(__CINT__)
-#include "izstream.h"
-#else
 #include <fstream>
-#define izstream ifstream
-#warning Support for zipped FITS files disabled.
-#endif
 
 #include "FITS.h"
 #include "checksum.h"
 
-class fits : public izstream
+class fits : public ifstream
 {
 public:
     //I know I know, you're going to yiell that this does not belong here.
@@ -139,36 +110,21 @@ public:
             {
                 std::ostringstream str;
                 str << "Key '" << key << "' not found.";
-#ifdef __EXCEPTIONS
                 throw std::runtime_error(str.str());
-#else
-                gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                return false;
-#endif
             }
 
             if (it->second.type!=type)
             {
                 std::ostringstream str;
                 str << "Wrong type for key '" << key << "': expected " << type << ", found " << it->second.type << ".";
-#ifdef __EXCEPTIONS
                 throw std::runtime_error(str.str());
-#else
-                gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                return false;
-#endif
             }
 
             if (!value.empty() && it->second.value!=value)
             {
                 std::ostringstream str;
                 str << "Wrong value for key '" << key << "': expected " << value << ", found " << it->second.value << ".";
-#ifdef __EXCEPTIONS
                 throw std::runtime_error(str.str());
-#else
-                gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                return false;
-#endif
             }
 
             return true;
@@ -321,12 +277,7 @@ public:
                     {
                         std::ostringstream str;
                         str << "FITS format TFORM='" << fmt << "' not yet supported.";
-#ifdef __EXCEPTIONS
                         throw std::runtime_error(str.str());
-#else
-                        gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                        return;
-#endif
                     }
                 }
 
@@ -342,12 +293,7 @@ public:
                 std::ostringstream str;
                 str << "Sum of bytes in columns [" << bytes << "] does not match (Z)NAXIS2 [" << bytes_per_row << "].";
 
-#ifdef __EXCEPTIONS
                 throw std::runtime_error(str.str());
-#else
-                gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                return;
-#endif
             }
 
             name = Get<std::string>("EXTNAME");
@@ -423,12 +369,7 @@ public:
             {
                 std::ostringstream str;
                 str << "Key '" << key << "' not found.";
-#ifdef __EXCEPTIONS
                 throw std::runtime_error(str.str());
-#else
-                gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                return T();
-#endif
             }
             return it->second.Get<T>();
         }
@@ -446,7 +387,7 @@ public:
             const Columns::const_iterator it = cols.find(key);
             return it==cols.end() ? 0 : it->second.num;
         }
-	
+
 
 
         // There may be a gap between the main table and the start of the heap:
@@ -483,11 +424,8 @@ public:
 
     void Exception(const std::string &txt)
     {
-#ifdef __EXCEPTIONS
         if (exceptions()&throwbit)
             throw std::runtime_error(txt);
-#endif
-        gLog << ___err___ << "ERROR - " << txt << std::endl;
     }
 
     // Public for the root dictionary
@@ -529,13 +467,7 @@ protected:
 
             fChkHeader.add(c, 80);
 
-//            if (c[0]==0)
-//                return vector<string>();
-
             std::string str(c);
-
-//            if (!str.empty())
-//                cout << setw(2) << i << "|" << str << "|" << (endtag?'-':'+') << endl;
 
             if (endtag==2 || str=="END                                                                             ")
             {
@@ -561,11 +493,7 @@ protected:
 
     std::string Compile(const std::string &key, int16_t i=-1) const
     {
-#if GCC_VERSION < 40603
-        return i<0 ? key : key+std::to_string((long long int)(i));
-#else
         return i<0 ? key : key+std::to_string(i);
-#endif
     }
 
     void Constructor(const std::string &fname, std::string fout="", const std::string& tableName="", bool force=false)
@@ -580,12 +508,7 @@ protected:
         if (memcmp(simple, "SIMPLE  = ", 10))
         {
             clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
             throw std::runtime_error("File is not a FITS file.");
-#else
-            gLog << ___err___ << "ERROR - File is not a FITS file." << std::endl;
-            return;
-#endif
         }
 
         seekg(0);
@@ -608,12 +531,7 @@ protected:
                 if (!good())
                 {
                     clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
                     throw std::runtime_error("FITS file corrupted.");
-#else
-                    gLog << ___err___ << "ERROR - FITS file corrupted." << std::endl;
-                    return;
-#endif
                 }
 
                 if (block.size()%36)
@@ -621,12 +539,7 @@ protected:
                     if (!rc && !force)
                     {
                         clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
                         throw std::runtime_error("END keyword missing in FITS header.");
-#else
-                        gLog << ___err___ << "ERROR - END keyword missing in FITS file... file might be corrupted." << std::endl;
-                        return;
-#endif
                     }
                     break;
                 }
@@ -688,12 +601,7 @@ protected:
         if (!fCopy)
         {
             clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Could not open output file.");
-#else
-            gLog << ___err___ << "ERROR - Failed to open output file." << std::endl;
-            return;
-#endif
         }
 
         const streampos p = tellg();
@@ -708,35 +616,27 @@ protected:
     }
 
 public:
-    fits(const std::string &fname, const std::string& tableName="", bool force=false) : izstream(fname.c_str())
+    fits(const std::string &fname, const std::string& tableName="", bool force=false) : ifstream(fname.c_str())
     {
         Constructor(fname, "", tableName, force);
         if ((fTable.is_compressed ||fTable.name=="ZDrsCellOffsets") && !force)
         {
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Trying to read a compressed fits with the base fits class. Use factfits instead.");
-#else
-            gLog << ___err___ << "ERROR - Trying to read a compressed fits with the base fits class. Use factfits instead." << std::endl;
-#endif
             clear(rdstate()|std::ios::badbit);
         }
     }
 
-    fits(const std::string &fname, const std::string &fout, const std::string& tableName, bool force=false) : izstream(fname.c_str())
+    fits(const std::string &fname, const std::string &fout, const std::string& tableName, bool force=false) : ifstream(fname.c_str())
     {
         Constructor(fname, fout, tableName, force);
         if ((fTable.is_compressed || fTable.name=="ZDrsCellOffsets") && !force)
         {
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Trying to read a compressed fits with the base fits class. Use factfits instead.");
-#else
-            gLog << ___err___ << "ERROR - Trying to read a compressed fits with the base fits class. Use factfits instead." << std::endl;
-#endif
             clear(rdstate()|std::ios::badbit);
         }
     }
 
-    fits() : izstream()
+    fits() : ifstream()
     {
 
     }
@@ -750,7 +650,7 @@ public:
 
     virtual void StageRow(size_t row, char* dest)
     {
-        // if (row!=fRow+1) // Fast seeking is ensured by izstream
+        // if (row!=fRow+1) // Fast seeking is ensured by ifstream
         seekg(fTable.offset+row*fTable.bytes_per_row);
         read(dest, fTable.bytes_per_row);
         //fin.clear(fin.rdstate()&~ios::eofbit);
@@ -989,10 +889,6 @@ public:
             return false;
         }
 
-        // if (fAddresses.count(ptr)>0)
-        //     gLog << warn << "SetPtrAddress('" << name << "') - Pointer " << ptr << " already assigned." << endl;
-
-        //fAddresses[ptr] = fTable.cols[name];
         fPointers[name] = ptr;
         fAddresses.emplace_back(ptr, fTable.cols[name]);
         sort(fAddresses.begin(), fAddresses.end(), Compare);
@@ -1015,7 +911,6 @@ public:
         return fTable.GetN(key);
     }
 
-//    size_t GetNumRows() const { return fTable.num_rows; }
     size_t GetRow() const { return fRow==(size_t)-1 ? 0 : fRow; }
 
     operator bool() const { return fTable && fTable.offset!=0; }
