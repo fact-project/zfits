@@ -23,7 +23,6 @@ public:
     {
         open(fname.c_str());
         Constructor(fname, "", tableName, force);
-//        InitCompressionReading();
     }
 
     // Alternative constructor
@@ -32,7 +31,6 @@ public:
     {
         open(fname.c_str());
         Constructor(fname, fout, tableName, force);
-//        InitCompressionReading();
     }
 
     //  Skip the next row
@@ -99,12 +97,7 @@ private:
                     continue;
 
                 clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
                 throw std::runtime_error("Only the FACT compression scheme is handled by this reader.");
-#else
-                gLog << ___err___ << "ERROR - Only the FACT compression scheme is handled by this reader." << std::endl;
-                return;
-#endif
             }
 
         fColumnOrdering.resize(fTable.sorted_cols.size(), FITS::kOrderByRow);
@@ -199,12 +192,7 @@ private:
                 if (tempValues[0] < 0 || tempValues[1] < 0)
                 {
                     clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
                     throw std::runtime_error("Negative value in the catalog");
-#else
-                    gLog << ___err___ << "ERROR - negative value in the catalog" << std::endl;
-                    return;
-#endif
                 }
                 //add catalog entry
                 fCatalog[i].emplace_back(tempValues[0], tempValues[1]);
@@ -220,12 +208,7 @@ private:
         if (fNumRowsPerTile%fShrinkFactor)
         {
             clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Rows per tile and shrink factor do not match");
-#else
-            gLog << ___err___ << "ERROR - Rows per tile and shrink factor do not match" << std::endl;
-            return;
-#endif
         }
 
         if (fShrinkFactor>0)
@@ -437,12 +420,7 @@ private:
 
                     std::ostringstream str;
                     str << "Unkown column ordering scheme found (i=" << i << ", " << fColumnOrdering[i] << ")";
-#ifdef __EXCEPTIONS
                     throw std::runtime_error(str.str());
-#else
-                    gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                    return false;
-#endif
                 };
             }
         }
@@ -548,12 +526,7 @@ private:
 
                     std::ostringstream str;
                     str << "Unknown processing applied to data (col=" << i << ", proc=" << j << "/" << (int)head->numProcs;
-#ifdef __EXCEPTIONS
                     throw std::runtime_error(str.str());
-#else
-                    gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                    return false;
-#endif
                 }
                 //increment destination counter only when processing done.
                 if (j==0)
@@ -638,12 +611,7 @@ private:
             clear(rdstate()|std::ios::badbit);
             std::ostringstream str;
             str << "Heap data does not agree with header: " << numRows << " calculated vs " << fTable.num_rows << " from header.";
-#ifdef __EXCEPTIONS
-                    throw std::runtime_error(str.str());
-#else
-                    gLog << ___err___ << "ERROR - " << str.str() << std::endl;
-                    return;
-#endif
+            throw std::runtime_error(str.str());
         }
 
         if (update_catalog)
@@ -658,12 +626,7 @@ private:
         if (catalog.size() != fCatalog.size())
         {
                     clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
                     throw std::runtime_error("Heap data does not agree with header.");
-#else
-                    gLog << ___err___ << "ERROR - Heap data does not agree with header." << std::endl;
-                    return;
-#endif
         }
 
         for (uint32_t i=0;i<catalog.size(); i++)
@@ -673,12 +636,7 @@ private:
                     catalog[i][j].second != fCatalog[i][j].second)
                 {
                     clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
                     throw std::runtime_error("Heap data does not agree with header.");
-#else
-                    gLog << ___err___ << "ERROR - Heap data does not agree with header." << std::endl;
-                    return;
-#endif
                 }
             }
         //go back to start of heap
@@ -689,4 +647,4 @@ private:
 
 };//class zfits
 
-#endif 
+#endif
