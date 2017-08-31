@@ -9,6 +9,7 @@ simple C function that alters data passed in via a pointer
 
 #include "huffman.h"
 #include "DrsCalib.h"
+#include "factfits.h"
 
 extern "C"{
     void c_multiply (double* array, double multiplier, int m, int n) {
