@@ -16,9 +16,7 @@ setup(
     entry_points={},
     package_data={'zfits': ['test_data/*']},
     zip_safe=False,
-    ext_modules=cythonize(
-           "zfits/*.pyx",                 # our Cython source
-    ),
+    ext_modules=cythonize("zfits/*.pyx",),
     tests_require=['pytest>=3.0.0'],
     setup_requires=['pytest-runner'],
 )
