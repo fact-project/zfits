@@ -9,11 +9,7 @@
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
-
-#define GCC_VERSION (__GNUC__ * 10000  + __GNUC_MINOR__ * 100  + __GNUC_PATCHLEVEL__)
-
 #include <unordered_map>
-
 #include <vector>
 #include <iomanip>
 #include <iostream>
