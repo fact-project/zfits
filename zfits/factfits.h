@@ -134,22 +134,12 @@ private:
         if (calib.GetNumRows() != 1)
         {
             clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Table 'ZDrsCellOffsets' found, but not with one row as expected");
-#else
-            gLog << ___err___ << "ERROR - Table 'ZDrsCellOffsets' found, but not with one row as expected" << std::endl;
-            return;
-#endif
         }
         if (calib.GetStr("TTYPE1") != "OffsetCalibration")
         {
             clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Table 'ZDrsCellOffsets' found, but first column is not the one expected");
-#else
-            gLog << ___err___ << "ERROR - Table 'ZDrsCellOffsets' found, but first column is not the one expected" << std::endl;
-            return;
-#endif
         }
         bool isColumnPresent = false;
         if (calib.HasKey("TFORM1") && calib.GetStr("TFORM1") == "1474560I") isColumnPresent = true;
@@ -157,12 +147,7 @@ private:
         if (!isColumnPresent)  // 1024*1440
         {
             clear(rdstate()|std::ios::badbit);
-#ifdef __EXCEPTIONS
             throw std::runtime_error("Table 'ZDrsCellOffsets' has wrong column format (TFROM1)");
-#else
-            gLog << ___err___ << "ERROR - Table 'ZDrsCellOffsets' has wrong column format (TFORM1)" << std::endl;
-            return;
-#endif
         }
 
         fOffsetCalibration.resize(1024*1440);
@@ -173,12 +158,7 @@ private:
 
         clear(rdstate()|std::ios::badbit);
 
-#ifdef __EXCEPTIONS
         throw std::runtime_error("Reading column 'OffsetCalibration' failed.");
-#else
-        gLog << ___err___ << "ERROR - Reading column 'OffsetCalibration' failed." << std::endl;
-#endif
-
     }
 
     std::vector<int16_t> fOffsetCalibration; ///< integer values of the drs calibration used for compression
@@ -188,7 +168,7 @@ private:
 
     uint16_t fNumRoi;
 
-#warning Time marker channels currently unhandled
+
 
 }; //class factfits
 
