@@ -85,6 +85,55 @@ public:
         SortedColumns sorted_cols;
         Keys    keys;
 
+        std::vector<std::string> GetColumnNames() const
+        {
+            std::vector<std::string> tmp;
+            for(
+                auto iter = cols.begin();
+                iter != cols.end();
+                ++iter
+            )
+            {
+                    std::string k =  iter->first;
+                    tmp.push_back(k);
+                    Column v = iter->second;
+            }
+            return tmp;
+        }
+
+        std::vector<char> GetColumnTypes() const
+        {
+            std::vector<char> tmp;
+            for(
+                auto iter = cols.begin();
+                iter != cols.end();
+                ++iter
+            )
+            {
+                    std::string k =  iter->first;
+                    Column v = iter->second;
+                    tmp.push_back(v.type);
+            }
+            return tmp;
+        }
+
+        std::vector<size_t> GetColumnWidth() const
+        {
+            std::vector<size_t> tmp;
+            for(
+                auto iter = cols.begin();
+                iter != cols.end();
+                ++iter
+            )
+            {
+                    std::string k =  iter->first;
+                    Column v = iter->second;
+                    tmp.push_back(v.num);
+            }
+            return tmp;
+        }
+
+
         int64_t datasum;
 
         std::string Trim(const std::string &str, char c=' ') const
@@ -399,11 +448,12 @@ public:
     typedef std::vector<Address> Addresses;
     typedef std::unordered_map<std::string, void*> Pointers;
 
+    Table fTable;
+
 protected:
     std::ofstream fCopy;
     std::vector<std::string> fListOfTables; // List of skipped tables. Last table is open table
 
-    Table fTable;
 
     //map<void*, Table::Column> fAddresses;
     Addresses fAddresses;
