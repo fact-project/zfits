@@ -2,7 +2,6 @@
 from fitsio import FITS
 import numpy as np
 cimport numpy as np
-cimport cython
 from libcpp.string cimport string
 from libcpp cimport bool as bool_t
 from libcpp.vector cimport vector
@@ -143,14 +142,3 @@ class FactFits:
     def __iter__(self):
         return self
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def remove_spikes_4(
-        np.ndarray[np.float32_t, ndim=2] calib_data not None,
-        ):
-
-    cdef int number_of_pixel = calib_data.shape[0]
-    cdef unsigned int roi = calib_data.shape[1]
-
-    remove_spikes_4_dom(&calib_data[0,0], number_of_pixel, roi)
-    return None

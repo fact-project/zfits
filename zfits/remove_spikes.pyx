@@ -1,8 +1,14 @@
 # distutils: language = c++
-# distutils: sources = remove_spikes_source.cpp
+# distutils: sources = zfits/remove_spikes_source.cpp
 import numpy as np
 cimport numpy as np
 cimport cython
+
+cdef extern void remove_spikes_4_dom(
+    float* calib_data,
+    size_t number_of_pixel,
+    np.uint32_t roi
+)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
