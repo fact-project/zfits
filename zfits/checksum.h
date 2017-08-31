@@ -74,19 +74,6 @@ public:
             addLoopSwapping(sbuf, end, hilo);
         else
             addLoop(sbuf, end, hilo);
-        /*const uint16_t *end = sbuf + len/2;
-        while (1)
-        {
-            if (sbuf==end)
-                break;
-
-            hilo[0] += ntohs(*sbuf++);
-
-            if (sbuf==end)
-                break;
-
-            hilo[1] += ntohs(*sbuf++);
-        }*/
 
         HandleCarryBits();
 
@@ -95,13 +82,6 @@ public:
 
     void addLoopSwapping(const uint16_t *sbuf, const uint16_t *end, uint32_t* hilo)
     {
-        /*
-        for (size_t i = 0; i < len/2; i++)
-        {
-            //swap the bytes of the 32 bits value. but...
-            //the hi and lo values are stored in fits-like order. do not swap them
-            hilo[i%2] += ntohs(sbuf[i]); //(sbuf[i]&0xff00)>>8 | (sbuf[i]&0x00ff)<<8;
-        }*/
 
         // This is about as twice as fast as the loop above
         // ntohs is CPU optimized, i%2 doesn't need to be computed
