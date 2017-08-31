@@ -297,41 +297,10 @@ public:
 
         void PrintKeys(bool display_all=false) const
         {
-            for (Keys::const_iterator it=keys.cbegin(); it!=keys.cend(); it++)
-            {
-                if (!display_all && FITS::IsReservedKeyWord(it->first))
-                    continue;
-
-                gLog << ___all___ << std::setw(2) << it->second.type << '|' << it->first << '=' << it->second.value << '/' << it->second.comment << '|' << std::endl;
-            }
         }
 
         void PrintColumns() const
         {
-            typedef std::map<std::pair<size_t, std::string>, Column> Sorted;
-
-            Sorted sorted;
-
-            for (Columns::const_iterator it=cols.cbegin(); it!=cols.cend(); it++)
-                sorted[std::make_pair(it->second.offset, it->first)] = it->second;
-
-            for (Sorted::const_iterator it=sorted.cbegin(); it!=sorted.cend(); it++)
-            {
-                gLog << ___all___ << std::setw(6) << it->second.offset << "| ";
-                gLog << it->second.num << 'x';
-                switch (it->second.type)
-                {
-                case 'A': gLog << "char(8)";    break;
-                case 'L': gLog << "bool(8)";    break;
-                case 'B': gLog << "byte(8)";    break;
-                case 'I': gLog << "short(16)";  break;
-                case 'J': gLog << "int(32)";    break;
-                case 'K': gLog << "int(64)";    break;
-                case 'E': gLog << "float(32)";  break;
-                case 'D': gLog << "double(64)"; break;
-                }
-                gLog << ": " << it->first.second << " [" << it->second.unit << "]" << std::endl;
-            }
         }
 
         operator bool() const { return !name.empty(); }
@@ -831,9 +800,6 @@ public:
             Exception(str.str());
             return false;
         }
-
-        // if (fAddresses.count(ptr)>0)
-        //     gLog << warn << "SetPtrAddress('" << name << "') - Pointer " << ptr << " already assigned." << endl;
 
         //fAddresses[ptr] = fTable.cols[name];
         fPointers[name] = ptr;
