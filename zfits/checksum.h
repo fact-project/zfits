@@ -60,12 +60,7 @@ public:
             std::ostringstream sout;
             sout << "Length " << len << " not dividable by 4";
 
-#ifdef __EXCEPTIONS
             throw std::runtime_error(sout.str());
-#else
-            gLog << ___err___ << "ERROR - " << sout.str() << std::endl;
-            return false;
-#endif
         }
 
         const uint16_t *sbuf = reinterpret_cast<const uint16_t *>(buf);
