@@ -14,11 +14,12 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <ios>
 
 #include "FITS.h"
 #include "checksum.h"
 
-class fits : public ifstream
+class fits : public std::ifstream
 {
 public:
     //I know I know, you're going to yiell that this does not belong here.
@@ -581,7 +582,7 @@ protected:
     }
 
 public:
-    fits(const std::string &fname, const std::string& tableName="", bool force=false) : ifstream(fname.c_str())
+    fits(const std::string &fname, const std::string& tableName="", bool force=false) : std::ifstream(fname.c_str())
     {
         Constructor(fname, "", tableName, force);
         if ((fTable.is_compressed ||fTable.name=="ZDrsCellOffsets") && !force)
@@ -591,7 +592,7 @@ public:
         }
     }
 
-    fits(const std::string &fname, const std::string &fout, const std::string& tableName, bool force=false) : ifstream(fname.c_str())
+    fits(const std::string &fname, const std::string &fout, const std::string& tableName, bool force=false) : std::ifstream(fname.c_str())
     {
         Constructor(fname, fout, tableName, force);
         if ((fTable.is_compressed || fTable.name=="ZDrsCellOffsets") && !force)
@@ -601,7 +602,7 @@ public:
         }
     }
 
-    fits() : ifstream()
+    fits() : std::ifstream()
     {
 
     }
