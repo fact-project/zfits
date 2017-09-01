@@ -59,3 +59,4 @@ docs/_build/
 target/
 zfits/factfits.cpp
 zfits/remove_spikes.cpp
+tests/resources/.ipynb_checkpoints/
