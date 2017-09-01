@@ -49,8 +49,8 @@ class FactFitsCalib:
             next(self)
 
         event = self.current_event
-        data = event['Data'].reshape(1440, -1)
-        sc = event['StartCellData']
+        data = event.Data
+        sc = event.StartCellData
 
         calib_data = np.empty_like(data, np.float32)
         roi = calib_data.shape[1]
