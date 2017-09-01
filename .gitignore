@@ -57,3 +57,5 @@ docs/_build/
 
 # PyBuilder
 target/
+zfits/factfits.cpp
+zfits/remove_spikes.cpp
