@@ -12,8 +12,10 @@ setup(
     license='MIT',
     packages=['zfits'],
     install_requires=[
-        'numpy',
-        'Cython',
+        'numpy>=1.12.1',
+        'Cython>=0.25.2',
+        'fitsio>=0.9.11',  # for `.headers()` and `drs.fits.gz` file.
+        'pyfact>=0.12.1',
     ],
     entry_points={},
     package_data={'zfits': ['test_data/*']},
