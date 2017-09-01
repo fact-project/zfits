@@ -26,7 +26,6 @@ class FactFitsCalib:
         self.previous_start_cells = []
         self.fMaxNumPrevEvents = 5
 
-        self.current_event = None
         self.rows = self.data_file.rows
 
     @property
@@ -38,17 +37,16 @@ class FactFitsCalib:
 
     def __next__(self):
         if self.row < self.rows:
-            next_event = next(self.data_file)
-            self.current_event = next_event
-            return next_event
+            event = next(self.data_file)
+            calib_data = self.get_data_calibrated(event)
+
+            d = event._asdict()
+            d['CalibData'] = calib_data
+            return d
         else:
             raise StopIteration
 
-    def get_data_calibrated(self):
-        if self.current_event is None:
-            next(self)
-
-        event = self.current_event
+    def get_data_calibrated(self, event):
         data = event.Data
         sc = event.StartCellData
 
