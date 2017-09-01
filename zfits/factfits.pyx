@@ -5,6 +5,7 @@ cimport numpy as np
 from libcpp.string cimport string
 from libcpp cimport bool as bool_t
 from libcpp.vector cimport vector
+from collections import namedtuple
 
 # maybe nice to know ... not needed at the moment.
 fits_to_np_map = {
@@ -128,6 +129,10 @@ class FactFits:
         for name, (dtype, width) in self.f.cols_dtypes.items():
             self.data[name] = set_ptr_address[dtype](name)
 
+        self.Event = namedtuple('Event', [
+            x.decode('utf-8') for x in self.f.cols_dtypes.keys()]
+        )
+
     def header(self):
         return self.fitsio[2].read_header()
 
@@ -135,7 +140,16 @@ class FactFits:
         if self.row < self.rows:
             self.f.GetRow(self.row)
             self.row += 1
-            return {k: v.copy() for k, v in self.data.items()}
+
+            evt_dict = {}
+            for k, v in self.data.items():
+                key = k.decode('utf-8')
+                value = v.copy()
+                if key == "Data":
+                    evt_dict[key] = value.reshape(1440, -1)
+                else:
+                    evt_dict[key] = value
+            return self.Event(**evt_dict)
         else:
             raise StopIteration
 
