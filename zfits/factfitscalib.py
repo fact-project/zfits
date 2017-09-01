@@ -1,7 +1,7 @@
 import numpy as np
 from fitsio import FITS
 from .factfits import FactFits
-from .factfits import remove_spikes_4
+from .remove_spikes import remove_spikes_4
 
 class FactFitsCalib:
 
