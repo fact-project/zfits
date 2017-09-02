@@ -24,7 +24,7 @@ setup(
         Extension(
             name="*",
             sources=["zfits/*.pyx"],
-            extra_compile_args=['-std=c++11'],
+            extra_compile_args=['-std=c++0x'],
         )
         ]),
     tests_require=['pytest>=3.0.0'],
