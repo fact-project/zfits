@@ -5,7 +5,7 @@ import numpy
 
 setup(
     name='zfits',
-    version='0.0.5',
+    version='0.0.6',
     description='a pure python zfits/factfits reader',
     url='https://github.com/fact-project/zfits',
     author='Dominik Neise',

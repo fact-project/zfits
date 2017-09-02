@@ -72,6 +72,7 @@ cdef class Pyfactfits:
         numpy_type_map = {
             'I': np.int16,
             'J': np.int32,
+            'B': np.uint8,
         }
 
         dtypes = {}
@@ -84,6 +85,21 @@ cdef class Pyfactfits:
 
         return dtypes
 
+    def SetPtrAddress_uint8(self, name):
+        dtype, width = self.cols_dtypes[name]
+        assert dtype == np.uint8, "Must be uint8"
+
+        cdef np.ndarray[np.uint8_t] _array = np.zeros(width, dtype=np.uint8)
+
+        self.c_factfits.SetPtrAddress(
+            name,
+            <np.uint8_t*>_array.data,
+            _array.shape[0]
+        )
+
+        return _array
+
+ 
     def SetPtrAddress_int16(self, name):
         dtype, width = self.cols_dtypes[name]
         assert dtype == np.int16, "Must be int16"
@@ -125,6 +141,7 @@ class FactFits:
         set_ptr_address = {
             np.int16: self.f.SetPtrAddress_int16,
             np.int32: self.f.SetPtrAddress_int32,
+            np.uint8: self.f.SetPtrAddress_uint8,
         }
         for name, (dtype, width) in self.f.cols_dtypes.items():
             self.data[name] = set_ptr_address[dtype](name)
