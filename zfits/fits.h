@@ -509,7 +509,7 @@ protected:
 
     std::string Compile(const std::string &key, int16_t i=-1) const
     {
-        return i<0 ? key : key+std::to_string(i);
+        return i<0 ? key : key+std::to_string((long long)(i));
     }
 
     void Constructor(const std::string &fname, std::string fout="", const std::string& tableName="", bool force=false)
