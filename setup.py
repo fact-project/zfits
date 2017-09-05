@@ -1,11 +1,11 @@
-from setuptools import setup, Extension
-from Cython.Distutils import build_ext
-
-import numpy
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Build import cythonize
+import numpy 
 
 setup(
     name='zfits',
-    version='0.0.3',
+    version='0.0.6',
     description='a pure python zfits/factfits reader',
     url='https://github.com/fact-project/zfits',
     author='Dominik Neise',
@@ -13,25 +13,23 @@ setup(
     license='MIT',
     packages=['zfits'],
     install_requires=[
-        'fitsio>=23',
-        'numpy',
-    ],
-    dependency_links=[
-        'git+https://github.com/dneise/fitsio#egg=fitsio-23.0.1'
+        'numpy>=1.12.1',
+        'Cython>=0.25.2',
+        'fitsio>=0.9.11',  # for `.headers()` and `drs.fits.gz` file.
+        'pyfact>=0.12.1',
     ],
     entry_points={},
     package_data={'zfits': ['test_data/*']},
     zip_safe=False,
-    cmdclass={'build_ext': build_ext},
-    ext_modules=[
+    ext_modules=cythonize([
         Extension(
-            'zfits.cython_tools',
-            sources=['zfits/cython_tools.pyx', 'zfits/fact++wrapper.cpp'],
+            name="*",
+            sources=["zfits/*.pyx"],
+            extra_compile_args=['-std=c++0x'],
+            language='c++',
             include_dirs=[numpy.get_include(), 'zfits'],
-            language="c++",
-            extra_compile_args=['-std=c++0x']
         )
-    ],
+        ]),
     tests_require=['pytest>=3.0.0'],
     setup_requires=['pytest-runner'],
 )

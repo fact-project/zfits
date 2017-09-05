@@ -1,14 +1,12 @@
 import numpy as np
 from fitsio import FITS
-from .zfits import ZFits
+from .factfits import FactFits
+from .remove_spikes import remove_spikes_4
 
-from .cython_tools import remove_spikes_4
-
-
-class FactFits:
+class FactFitsCalib:
 
     def __init__(self, data_path, calib_path):
-        self.data_file = ZFits(data_path)
+        self.data_file = FactFits(data_path)
         self.drs_file = FITS(calib_path)
 
         bsl = self.drs_file[1]["BaselineMean"][0]
@@ -28,19 +26,29 @@ class FactFits:
         self.previous_start_cells = []
         self.fMaxNumPrevEvents = 5
 
-        self.current_row = None
+        self.rows = self.data_file.rows
 
-    def get(self, colname, row):
-        data = self.data_file.get("Events", colname, row)
+    @property
+    def row(self):
+        return self.data_file.row
 
-        return data
+    def __iter__(self):
+        return self
 
-    def get_data_calibrated(self, row):
-        if self.current_row == row:
-            return self.calib_data
+    def __next__(self):
+        if self.row < self.rows:
+            event = next(self.data_file)
+            calib_data = self.get_data_calibrated(event)
 
-        data = self.data_file.get_raw_data(row)
-        sc = self.data_file.get("Events", "StartCellData", row)
+            d = event._asdict()
+            d['CalibData'] = calib_data
+            return d
+        else:
+            raise StopIteration
+
+    def get_data_calibrated(self, event):
+        data = event.Data
+        sc = event.StartCellData
 
         calib_data = np.empty_like(data, np.float32)
         roi = calib_data.shape[1]
@@ -57,7 +65,6 @@ class FactFits:
         self._remove_spikes_in_place(calib_data)
 
         self.calib_data = calib_data
-        self.current_row = row
         return calib_data
 
     def _remove_jumps(self, calib_data, sc):
@@ -81,9 +88,6 @@ class FactFits:
 
     def _remove_spikes_in_place(self, calib_data):
         remove_spikes_4(calib_data)
-
-    def __repr__(self):
-        return repr(self.data_file[2]) + repr(self.drs_file[1])
 
 
 def correct_step(calib_data, dists):
