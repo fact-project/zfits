@@ -1,11 +1,11 @@
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
-import numpy 
+import numpy
 
 setup(
     name='zfits',
-    version='0.0.6',
+    version='0.0.7',
     description='a pure python zfits/factfits reader',
     url='https://github.com/fact-project/zfits',
     author='Dominik Neise',

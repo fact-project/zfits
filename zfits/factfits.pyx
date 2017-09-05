@@ -99,7 +99,7 @@ cdef class Pyfactfits:
 
         return _array
 
- 
+
     def SetPtrAddress_int16(self, name):
         dtype, width = self.cols_dtypes[name]
         assert dtype == np.int16, "Must be int16"
@@ -146,10 +146,6 @@ class FactFits:
         for name, (dtype, width) in self.f.cols_dtypes.items():
             self.data[name] = set_ptr_address[dtype](name)
 
-        self.Event = namedtuple('Event', [
-            x.decode('utf-8') for x in self.f.cols_dtypes.keys()]
-        )
-
     def header(self):
         return self.fitsio[2].read_header()
 
@@ -166,7 +162,16 @@ class FactFits:
                     evt_dict[key] = value.reshape(1440, -1)
                 else:
                     evt_dict[key] = value
-            return self.Event(**evt_dict)
+
+            foo = {}
+            for k, v in evt_dict.items():
+                if v.shape[0] == 0:
+                    pass
+                elif v.shape[0] == 1:
+                    foo[k] = v[0]
+                else:
+                    foo[k] = v
+            return foo
         else:
             raise StopIteration
 
