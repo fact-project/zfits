@@ -99,7 +99,7 @@ cdef class Pyfactfits:
 
         return _array
 
- 
+
     def SetPtrAddress_int16(self, name):
         dtype, width = self.cols_dtypes[name]
         assert dtype == np.int16, "Must be int16"
@@ -165,6 +165,8 @@ class FactFits:
                 if key == "Data":
                     evt_dict[key] = value.reshape(1440, -1)
                 else:
+                    if len(value) == 1:
+                        value = value[0]
                     evt_dict[key] = value
             return self.Event(**evt_dict)
         else:
