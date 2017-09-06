@@ -168,7 +168,6 @@ class FactFits:
         if self.row >= self.rows:
             raise StopIteration
 
-
         evt_dict = {}
 
         if self.zfits:
@@ -176,7 +175,13 @@ class FactFits:
             for k, v in self.data.items():
                 key = k.decode('utf-8')
                 value = v.copy()
-                evt_dict[key] = value
+                if value.shape[0] == 0:
+                    pass
+                elif value.shape[0] == 1:
+                    evt_dict[key] = value[0]
+                else:
+                    evt_dict[key] = value
+
         else:
             data = self.fits['Events'][self.row]
             for column in data.dtype.names:
@@ -185,6 +190,7 @@ class FactFits:
         self.row += 1
 
         evt_dict['Data'].shape = (1440, -1)
+
         return evt_dict
 
     def __iter__(self):
