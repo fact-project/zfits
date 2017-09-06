@@ -41,15 +41,14 @@ class FactFitsCalib:
             event = next(self.data_file)
             calib_data = self.get_data_calibrated(event)
 
-            d = event._asdict()
-            d['CalibData'] = calib_data
-            return d
+            event['CalibData'] = calib_data
+            return event
         else:
             raise StopIteration
 
     def get_data_calibrated(self, event):
-        data = event.Data
-        sc = event.StartCellData
+        data = event['Data']
+        sc = event['StartCellData']
 
         calib_data = np.empty_like(data, np.float32)
         roi = calib_data.shape[1]
