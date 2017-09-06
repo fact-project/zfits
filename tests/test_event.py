@@ -13,12 +13,13 @@ def test_event_shapes():
     from zfits import FactFits
     from zfits import FactFitsCalib
 
-    for file in [FactFitsCalib(
-        'tests/resources/testDataFile.fits.gz',
-        'tests/resources/testDrsFile.drs.fits.gz',
-        ),
+    for file in [
+        FactFitsCalib(
+            'tests/resources/testDataFile.fits.gz',
+            'tests/resources/testDrsFile.drs.fits.gz',
+            ),
         FactFits('tests/resources/20160817_016.fits.fz')
-        ]:
+    ]:
         event = next(file)
 
         for k, v in event.items():
