@@ -14,7 +14,7 @@ def test_event_shapes():
     from zfits import FactFitsCalib
 
     for file in [
-        FactFitsCalib(  # simulation
+        FactFitsCalib(  # facttools-observation
             'tests/resources/testDataFile.fits.gz',
             'tests/resources/testDrsFile.drs.fits.gz',
             ),
@@ -22,6 +22,10 @@ def test_event_shapes():
         FactFitsCalib(  # observation
             'tests/resources/20160817_016.fits.fz',
             'tests/resources/20160817_030.drs.fits.gz',
+        ),
+        FactFitsCalib(  # simulation
+            'tests/resources/testMcFile.fits.gz',
+            'tests/resources/testMcDrsFile.drs.fits.gz',
         ),
         # observation, just not calibrated
         FactFits('tests/resources/20160817_016.fits.fz'),
