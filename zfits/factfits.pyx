@@ -169,8 +169,6 @@ class FactFits:
         else:
             colnames = self.fits['Events'].get_colnames()
 
-        self.Event = namedtuple('Event', colnames)
-
     def header(self):
         return self.fits['Events'].read_header()
 
@@ -195,7 +193,7 @@ class FactFits:
         self.row += 1
 
         evt_dict['Data'].shape = (1440, -1)
-        return self.Event(**evt_dict)
+        return evt_dict
 
     def __iter__(self):
         return self
