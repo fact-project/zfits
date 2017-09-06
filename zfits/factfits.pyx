@@ -161,14 +161,6 @@ class FactFits:
             for name, (dtype, width) in self.fact_fits.cols_dtypes.items():
                 self.data[name] = set_ptr_address[dtype](name)
 
-            colnames = [
-                c.decode('utf-8')
-                for c in self.fact_fits.cols_dtypes.keys()
-            ]
-
-        else:
-            colnames = self.fits['Events'].get_colnames()
-
     def header(self):
         return self.fits['Events'].read_header()
 
