@@ -1,7 +1,11 @@
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
-import numpy
+
+
+def get_numpy_includes():
+    import numpy
+    return numpy.get_include()
 
 setup(
     name='zfits',
@@ -27,9 +31,11 @@ setup(
             sources=["zfits/*.pyx"],
             extra_compile_args=['-std=c++0x'],
             language='c++',
-            include_dirs=[numpy.get_include(), 'zfits'],
+            include_dirs=[get_numpy_includes(), 'zfits'],
         )
         ]),
     tests_require=['pytest>=3.0.0'],
-    setup_requires=['pytest-runner'],
+    setup_requires=[
+        'numpy',
+        'pytest-runner'],
 )
