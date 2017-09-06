@@ -132,48 +132,66 @@ cdef class Pyfactfits:
 class FactFits:
 
     def __init__(self, fname):
-        self.f = Pyfactfits(fname)
-        self.fitsio = FITS(fname)
-        self.row = 0
-        self.rows = self.f.GetNumRows()
+        self.fits = FITS(fname)
 
-        self.data = {}
-        set_ptr_address = {
-            np.int16: self.f.SetPtrAddress_int16,
-            np.int32: self.f.SetPtrAddress_int32,
-            np.uint8: self.f.SetPtrAddress_uint8,
-        }
-        for name, (dtype, width) in self.f.cols_dtypes.items():
-            self.data[name] = set_ptr_address[dtype](name)
+        header = self.header()
+        if 'ZTABLE' in header and header['ZTABLE']:
+            self.zfits = True
+        else:
+            self.zfits = False
+
+        if self.zfits:
+            self.fact_fits = Pyfactfits(fname)
+
+        self.row = 0
+
+        if self.zfits:
+            self.rows = self.fact_fits.GetNumRows()
+        else:
+            self.rows = self.fits['Events'].get_nrows()
+
+        if self.zfits:
+            set_ptr_address = {
+                np.int16: self.fact_fits.SetPtrAddress_int16,
+                np.int32: self.fact_fits.SetPtrAddress_int32,
+                np.uint8: self.fact_fits.SetPtrAddress_uint8,
+            }
+
+            self.data = {}
+            for name, (dtype, width) in self.fact_fits.cols_dtypes.items():
+                self.data[name] = set_ptr_address[dtype](name)
 
     def header(self):
-        return self.fitsio[2].read_header()
+        return self.fits['Events'].read_header()
 
     def __next__(self):
-        if self.row < self.rows:
-            self.f.GetRow(self.row)
-            self.row += 1
+        if self.row >= self.rows:
+            raise StopIteration
 
-            evt_dict = {}
+        evt_dict = {}
+
+        if self.zfits:
+            self.fact_fits.GetRow(self.row)
             for k, v in self.data.items():
                 key = k.decode('utf-8')
                 value = v.copy()
-                if key == "Data":
-                    evt_dict[key] = value.reshape(1440, -1)
+                if value.shape[0] == 0:
+                    pass
+                elif value.shape[0] == 1:
+                    evt_dict[key] = value[0]
                 else:
                     evt_dict[key] = value
 
-            foo = {}
-            for k, v in evt_dict.items():
-                if v.shape[0] == 0:
-                    pass
-                elif v.shape[0] == 1:
-                    foo[k] = v[0]
-                else:
-                    foo[k] = v
-            return foo
         else:
-            raise StopIteration
+            data = self.fits['Events'][self.row]
+            for column in data.dtype.names:
+                evt_dict[column] = data[column][0]
+
+        self.row += 1
+
+        evt_dict['Data'].shape = (1440, -1)
+
+        return evt_dict
 
     def __iter__(self):
         return self

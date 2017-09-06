@@ -3,6 +3,7 @@ from fitsio import FITS
 from .factfits import FactFits
 from .remove_spikes import remove_spikes_4
 
+
 class FactFitsCalib:
 
     def __init__(self, data_path, calib_path):
