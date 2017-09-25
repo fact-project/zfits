@@ -1,9 +1,10 @@
 # zfits
 
+```python
+    from zfits import FactFits
+    with FactFits('20160401_153.fits.fz') as f:
+        for event in f:
+            print(event)
 
-from zfits import FactFits
-with FactFits('20160401_153.fits.fz') as f:
-    for event in f:
-        print(event)
-
-# event is a dict{string: np.1d-array}
+    # event is a dict{string: np.1d-array}
+```
