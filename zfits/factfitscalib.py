@@ -54,6 +54,8 @@ class FactFitsCalib:
         roi = calib_data.shape[1]
 
         for pix in range(1440):
+            if sc[pix] == -1:
+                continue
             sl = slice(sc[pix], sc[pix] + roi)
             calib_data[pix] = data[pix] * 2000.0 / 4096.0
             calib_data[pix] -= self.bsl[pix, sl]
