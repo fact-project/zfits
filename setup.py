@@ -9,7 +9,7 @@ def get_numpy_includes():
 
 setup(
     name='zfits',
-    version='0.1.0',
+    version='0.1.1',
     description='a pure python zfits/factfits reader',
     url='https://github.com/fact-project/zfits',
     author='Dominik Neise',
