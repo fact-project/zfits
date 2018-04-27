@@ -6,7 +6,7 @@ from .remove_spikes import remove_spikes_4
 
 class FactFitsCalib:
 
-    def __init__(self, data_path, calib_path):
+    def __init__(self, data_path, calib_path, pixel_ids=None):
         self.data_file = FactFits(data_path)
         self.drs_file = FITS(calib_path)
 
@@ -28,6 +28,10 @@ class FactFitsCalib:
         self.fMaxNumPrevEvents = 5
 
         self.rows = self.data_file.rows
+        if pixel_ids is None:
+            self.pixel_ids = np.arange(1440)
+        else:
+            self.pixel_ids = np.array(pixel_ids)
 
     @property
     def row(self):
@@ -50,18 +54,21 @@ class FactFitsCalib:
         data = event['Data']
         sc = event['StartCellData']
 
-        calib_data = np.empty_like(data, np.float32)
+        calib_data = np.empty(
+            (len(self.pixel_ids), data.shape[1]),
+            np.float32
+        )
         roi = calib_data.shape[1]
 
-        for pix in range(1440):
+        for i, pix in enumerate(self.pixel_ids):
             if sc[pix] == -1:
                 continue
             sl = slice(sc[pix], sc[pix] + roi)
-            calib_data[pix] = data[pix] * 2000.0 / 4096.0
-            calib_data[pix] -= self.bsl[pix, sl]
-            calib_data[pix] -= self.trg[pix]
-            calib_data[pix] /= self.gain[pix, sl]
-            calib_data[pix] *= 1907.35
+            calib_data[i] = data[pix] * 2000.0 / 4096.0
+            calib_data[i] -= self.bsl[pix, sl]
+            calib_data[i] -= self.trg[pix]
+            calib_data[i] /= self.gain[pix, sl]
+            calib_data[i] *= 1907.35
 
         calib_data = self._remove_jumps(calib_data, sc)
         self._remove_spikes_in_place(calib_data)
@@ -75,11 +82,11 @@ class FactFitsCalib:
         for old_sc in self.previous_start_cells:
             correct_step(
                 calib_data,
-                dists=(old_sc - sc + roi+10 + 1024) % 1024
+                dists=((old_sc - sc + roi+10 + 1024) % 1024)[self.pixel_ids]
             )
             correct_step(
                 calib_data,
-                dists=(old_sc - sc + 3 + 1024) % 1024
+                dists=((old_sc - sc + 3 + 1024) % 1024)[self.pixel_ids]
             )
 
         self.previous_start_cells.append(np.copy(sc))
