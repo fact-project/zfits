@@ -1,6 +1,5 @@
 # distutils: language = c++
 # distutils: sources = zfits/remove_spikes_source.cpp
-# cython: language_level=3
 import numpy as np
 cimport numpy as np
 cimport cython
