@@ -5,7 +5,6 @@ from .remove_spikes import remove_spikes_4
 
 
 class FactFitsCalib:
-
     def __init__(self, data_path, calib_path, pixel_ids=None):
         self.data_file = FactFits(data_path)
         self.drs_file = FITS(calib_path)
@@ -45,19 +44,16 @@ class FactFitsCalib:
             event = next(self.data_file)
             calib_data = self.get_data_calibrated(event)
 
-            event['CalibData'] = calib_data
+            event["CalibData"] = calib_data
             return event
         else:
             raise StopIteration
 
     def get_data_calibrated(self, event):
-        data = event['Data']
-        sc = event['StartCellData']
+        data = event["Data"]
+        sc = event["StartCellData"]
 
-        calib_data = np.empty(
-            (len(self.pixel_ids), data.shape[1]),
-            np.float32
-        )
+        calib_data = np.empty((len(self.pixel_ids), data.shape[1]), np.float32)
         roi = calib_data.shape[1]
 
         for i, pix in enumerate(self.pixel_ids):
@@ -82,17 +78,14 @@ class FactFitsCalib:
         for old_sc in self.previous_start_cells:
             correct_step(
                 calib_data,
-                dists=((old_sc - sc + roi+10 + 1024) % 1024)[self.pixel_ids]
+                dists=((old_sc - sc + roi + 10 + 1024) % 1024)[self.pixel_ids],
             )
             correct_step(
-                calib_data,
-                dists=((old_sc - sc + 3 + 1024) % 1024)[self.pixel_ids]
+                calib_data, dists=((old_sc - sc + 3 + 1024) % 1024)[self.pixel_ids]
             )
 
         self.previous_start_cells.append(np.copy(sc))
-        self.previous_start_cells = self.previous_start_cells[
-            -self.fMaxNumPrevEvents:
-        ]
+        self.previous_start_cells = self.previous_start_cells[-self.fMaxNumPrevEvents :]
         return calib_data
 
     def _remove_spikes_in_place(self, calib_data):
@@ -108,7 +101,7 @@ def correct_step(calib_data, dists):
     if np.isnan(patch_steps).all():
         return
     average_step = np.nanmean(patch_steps)
-    if average_step == 0.:
+    if average_step == 0.0:
         return
 
     if np.nanstd(patch_steps) > 5:
@@ -128,11 +121,7 @@ def correct_step(calib_data, dists):
 
 def find_steps(data, dists):
     diff = np.diff(
-        data[
-            np.arange(data.shape[0])[:, None],
-            dists[:, None] + [-1, 0]
-        ],
-        axis=1
+        data[np.arange(data.shape[0])[:, None], dists[:, None] + [-1, 0]], axis=1
     )
     # treat special cases
     diff[dists == 0] = np.nan
