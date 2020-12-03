@@ -9,3 +9,9 @@
 
     # event is a dict{string: np.1d-array}
 ```
+
+
+## Install
+
+    pip install .
+

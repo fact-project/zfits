@@ -186,7 +186,7 @@ class FactFits:
         else:
             data = self.fits['Events'][self.row]
             for column in data.dtype.names:
-                evt_dict[column] = data[column][0]
+                evt_dict[column] = data[column]
 
         self.row += 1
 
